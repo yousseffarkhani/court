@@ -1,0 +1,21 @@
+version: "3.1"
+services:
+  web:
+    build: .
+    env_file:
+      - .env
+    environment:
+      app_env: ${APP_ENV}
+    volumes:
+      - .:/go/src/app
+    restart: always
+    ports:
+      - 8080:8080
+    links:
+      - db
+
+  db:
+    image: postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}

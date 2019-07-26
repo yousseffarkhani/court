@@ -1,0 +1,10 @@
+{{ define "yield"}}
+<div id="courts-container"></div>
+
+<script>
+  const courts = {{.}};
+  const container = document.querySelector("#courts-container");
+
+  filterCourts();
+</script>
+{{ end }}

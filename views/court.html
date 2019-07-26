@@ -1,0 +1,43 @@
+{{ define "yield"}}
+<div id="court-details">
+  <ul id="details">
+    <li>Nom : {{ .Name }}</li>
+    <li>
+      {{ .Adress }}
+    </li>
+    <li>Dimensions: {{ .Dimensions}} m²</li>
+    <li>Revêtement: {{ .Revetement}}</li>
+    <li>Découvert: {{ .Decouvert}}</li>
+    <li>Eclairage: {{ .Eclairage}}</li>
+    <li>
+      <a
+        href="http://www.webvilles.net/sports/activites/140062/terrain-de-mini--basket-ball-paris.php"
+        >Plus d'informations</a
+      >
+    </li>
+  </ul>
+  <div id="map"></div>
+</div>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBl13ydompVLpuZd_F727LIu89toMGP2nY"></script>
+<script>
+  const createMap = (coordinates, element, adresse) => {
+    const map = new google.maps.Map(element, {
+      center: coordinates,
+      zoom: 13
+    });
+    const marker = new google.maps.Marker({
+      position: coordinates,
+      map: map
+    });
+    const infoWindow = new google.maps.InfoWindow({
+      content: adresse
+    });
+    infoWindow.open(map, marker);
+  };
+  createMap(
+    { lat: +{{ .Lattitude}}, lng: +{{ .Longitude}} },
+    document.querySelector("#map"),
+    "{{ .Adress }}"
+  );
+</script>
+{{ end }}

@@ -1,0 +1,112 @@
+@import url("https://fonts.googleapis.com/css?family=Quicksand&display=swap");
+
+* {
+  margin: 0;
+  padding: 0;
+  font-family: "Quicksand", sans-serif;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  height: 100%;
+  width: 100%;
+}
+
+a {
+  text-decoration: none;
+}
+
+ul {
+  list-style-type: none;
+}
+
+section {
+  width: 100%;
+  height: 100%;
+}
+
+/* CSS for main.html */
+
+header {
+  background-color: grey;
+  padding: 1rem;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  margin-bottom: 1rem;
+  position: sticky;
+  top: 0px;
+  z-index: 1;
+}
+
+#title {
+  color: white;
+  font-size: 2rem;
+}
+
+#search-form {
+  display: flex;
+}
+
+#input {
+  width: 300px;
+  text-align: center;
+}
+
+#searchBtn {
+  margin-left: 0.5rem;
+}
+
+/* CSS for index.html */
+#courts-container {
+  width: 90%;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+}
+
+.card-body {
+  width: 80%;
+  color: black;
+  border: 1px solid black;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-items: center;
+  align-items: center;
+  cursor: pointer;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.card-title {
+  padding: 1rem 0;
+  font-size: 1.2rem;
+}
+
+/* CSS for court.html */
+
+#court-details {
+  height: 100%;
+  width: 90%;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#details {
+  flex: 1;
+  text-align: center;
+}
+
+#map {
+  flex: 2;
+  height: 50vh;
+  color: black;
+}
