@@ -7,8 +7,21 @@ WORKDIR /go/src/app
 ADD . .
 
 # Adds local dependencies
+# courtdb package
 RUN mkdir /go/src/courtdb
 RUN ln -s /go/src/app/courtdb/courtdb.go /go/src/courtdb/courtdb.go
+# server package
+RUN mkdir /go/src/server
+RUN ln -s /go/src/app/server/server.go /go/src/server/server.go
+# views package
+RUN mkdir /go/src/views
+RUN ln -s /go/src/app/views/views.go /go/src/views/views.go
+# model package
+RUN mkdir /go/src/model
+RUN ln -s /go/src/app/model/model.go /go/src/model/model.go
+# middlewares package
+RUN mkdir /go/src/middlewares
+RUN ln -s /go/src/app/middlewares/middlewares.go /go/src/middlewares/middlewares.go
 
 # Downloads all dependecies
 RUN go get ./

@@ -62,6 +62,10 @@ header {
   margin-left: 0.5rem;
 }
 
+.error {
+  color: red;
+}
+
 /* CSS for index.html */
 #courts-container {
   width: 90%;

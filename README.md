@@ -1,8 +1,10 @@
-X Supprimer et réinitialiser le git
+TODOs :
 
-- Faire en sorte qu'au début de l'application la BDD soit initialisée.
+- Add login and register mechanism
+- Commentaires
 - Copier le README du projet NODE
-- Ajouter le fichier .env pour masquer les passwords
+- Remplacer "github.com/yousseffarkhani/court/courtdb"
+  "github.com/yousseffarkhani/court/views" par views / courtdb / ...
 
 # Introduction
 

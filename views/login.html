@@ -1,0 +1,42 @@
+{{ define "yield"}}
+<div id="container">
+  <div id="left">
+    <p>Rejoins la communauté !</p>
+    <a href="/signup">Créer un compte</a>
+  </div>
+  <div id="right">
+    <form action="/signin" method="POST">
+      <fieldset>
+        <legend>Connexion</legend>
+        <label for="username">Name </label>
+        <input type="text" name="username" />
+        <br />
+        <label for="password">Password </label>
+        <input type="password" name="password" />
+      </fieldset>
+      <button type="submit">Login</button>
+    </form>
+    {{range $key, $value := .}}
+    <div class="error">{{ $key }} : {{ $value }}</div>
+    {{ end }}
+  </div>
+</div>
+<style>
+  #container {
+    display: flex;
+    width: 50%;
+    height: 500px;
+    margin: 0 auto;
+    border: 1px solid black;
+  }
+  #left,
+  #right {
+    height: 100%;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+</style>
+{{ end }}

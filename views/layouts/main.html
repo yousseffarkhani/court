@@ -20,6 +20,13 @@
         <a id="title" href="/"
           >🏀 Court, trouves le terrain de basket-ball le plus proche !</a
         >
+        {{if .UserLogged}}
+        <a href="">Profil</a>
+        <a href="/logout">Déconnexion</a>
+        <a href="/courts/new">Créer un terrain</a>
+        {{else}}
+        <a href="/login">Connexion</a>
+        {{ end }}
       </nav>
       <form id="search-form">
         <input
@@ -35,7 +42,7 @@
     </header>
     <script src="/static/js/main.js"></script>
     <section>
-      {{ template "yield" .}}
+      {{ template "yield" .Data}}
     </section>
   </body>
 </html>

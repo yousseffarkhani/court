@@ -4,32 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"model"
 	"os"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	_ "github.com/lib/pq"
 )
-
-type Court struct {
-	gorm.Model
-	Name           string `json:"nom"`
-	Url            string `json:"url"`
-	Adress         string `json:"adresse"`
-	Arrondissement string `json:"arrondissement"`
-	Longitude      string `json:"longitude"`
-	Lattitude      string `json:"lattitude"`
-	Dimensions     string `json:"dimensions"`
-	Revetement     string `json:"revetement"`
-	Decouvert      string `json:"decouvert"`
-	Eclairage      string `json:"eclairage"`
-}
-
-type Store interface {
-	AddCourt(court Court) error
-	GetCourts() ([]*Court, error)
-	GetCourt() Court
-}
 
 type CourtStore struct {
 	db *gorm.DB
@@ -58,7 +39,7 @@ func (db *CourtStore) Close() error {
 	return db.db.Close()
 }
 
-/* Initialize database */
+/* Database Initialisation */
 
 func InitialMigration() (*gorm.DB, error) {
 	psqlInfo := fmt.Sprintf("host=%s port=%s user=%s password=%s sslmode=disable", host, port, user, password)
@@ -71,7 +52,8 @@ func InitialMigration() (*gorm.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	db.AutoMigrate(&Court{})
+	db.AutoMigrate(&model.Court{})
+	db.AutoMigrate(&model.User{})
 	return db, nil
 }
 
@@ -102,7 +84,7 @@ func (db *CourtStore) InitDB() {
 	defer file.Close()
 
 	decoder := json.NewDecoder(file)
-	var courts []Court
+	var courts []model.Court
 	err = decoder.Decode(&courts)
 	if err != nil {
 		log.Fatalln(err)
@@ -113,40 +95,60 @@ func (db *CourtStore) InitDB() {
 	}
 }
 
-/* CRUD methods */
-func Open() (*CourtStore, error) {
-	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s dbname=%s password=%s sslmode=disable", host, port, user, dbname, password)
-	db, err := gorm.Open(driverName, psqlInfo)
-	if err != nil {
-		return nil, err
+/* Court CRUD methods */
+func (db *CourtStore) AddCourt(newCourt model.Court) error {
+	if _, err := db.GetCourtByName(newCourt.Name); err != nil {
+		db.db.Create(&newCourt)
+		fmt.Println("New court successfully created")
+		return nil
 	}
-	return &CourtStore{db}, nil
+	return duplicateError{"This court already exists"}
 }
 
-func (db *CourtStore) AddCourt(court Court) {
-	db.db.Create(&Court{
-		Name:           court.Name,
-		Url:            court.Url,
-		Adress:         court.Adress,
-		Arrondissement: court.Arrondissement,
-		Longitude:      court.Longitude,
-		Lattitude:      court.Lattitude,
-		Dimensions:     court.Dimensions,
-		Revetement:     court.Revetement,
-		Decouvert:      court.Decouvert,
-		Eclairage:      court.Eclairage,
-	})
-	fmt.Println("New court successfully created")
-}
-
-func (db *CourtStore) GetAllCourts() []Court {
-	var courts []Court
+func (db *CourtStore) GetAllCourts() []model.Court {
+	var courts []model.Court
 	db.db.Find(&courts)
 	return courts
 }
 
-func (db *CourtStore) GetCourt(id string) Court {
-	var court Court
+func (db *CourtStore) GetCourt(id int) model.Court {
+	var court model.Court
 	db.db.Where("id=?", id).Find(&court)
 	return court
+}
+
+func (db *CourtStore) GetCourtByName(name string) (model.Court, error) {
+	var court model.Court
+	db.db.Where("name=?", name).Find(&court)
+	if (court == model.Court{}) {
+		return model.Court{}, duplicateError{"This court doesn't exist"}
+	}
+	return court, nil
+}
+
+/* User CRUD methods */
+func (db *CourtStore) AddUser(newUser model.User) error {
+	if _, err := db.GetUser(newUser.Username); err != nil {
+		db.db.Create(&newUser)
+		fmt.Println("New user successfully created")
+		return nil
+	}
+	return duplicateError{"This username already exists"}
+}
+
+func (db *CourtStore) GetUser(username string) (model.User, error) {
+	var user model.User
+	db.db.Where("username=?", username).Find(&user)
+	if (user == model.User{}) {
+		return model.User{}, duplicateError{"This username doesn't exist"}
+	}
+	return user, nil
+}
+
+type duplicateError struct {
+	description string
+}
+
+func (err duplicateError) Error() string {
+	return err.description
 }

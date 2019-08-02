@@ -1,13 +1,13 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
 
 	"courtdb"
+	"server"
 )
 
 func main() {
@@ -21,15 +21,11 @@ func main() {
 	CheckError(err)
 	defer courtStore.Close()
 
-	// server, err := server.NewBasketServer(courtStore)
-	// CheckError(err)
-	http.HandleFunc("/test", func(w http.ResponseWriter, r *http.Request) {
-		courtss := courtStore.GetAllCourts()
-		json.NewEncoder(w).Encode(courtss)
-	})
+	server, err := server.NewBasketServer(courtStore)
+	CheckError(err)
+
 	fmt.Printf("Starting the server on port: %s\n", port)
-	// log.Fatal(http.ListenAndServe(":"+port, server))
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	log.Fatal(http.ListenAndServe(":"+port, server))
 }
 
 func CheckError(err error) {
