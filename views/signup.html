@@ -1,40 +1,73 @@
 {{ define "yield"}}
 
-<div id="container">
-  <div id="right">
-    <form action="/signup" method="POST">
-      <fieldset>
-        <legend>Créer un compte</legend>
-        <label for="username">Name </label>
-        <input type="text" name="username" />
-        <br />
-        <label for="password">Password </label>
-        <input type="password" name="password" />
-      </fieldset>
-
-      <button type="submit">Créer compte</button>
-    </form>
-    {{range $key, $value := .}}
-    <div class="error">{{ $key }} : {{ $value }}</div>
-    {{ end }}
+<div id="form-container">
+  {{if .ActionDone}}
+  <div class="success">
+    Votre compte a bien été crée. Vous allez être redirigé dans quelques
+    secondes ...
   </div>
+  <script type="text/javascript">
+    setTimeout("location.href = '/';", 3000);
+  </script>
+  {{ else }}
+  <form action="/signup" method="POST">
+    <fieldset>
+      <legend>Créer un compte</legend>
+      <label for="username">Nom</label>
+      <input type="text" name="username" value="{{.Ressource}}" />
+      <br />
+      <label for="password">Mot de passe</label>
+      <input type="password" name="password" /><br />
+      <button class="button" type="submit">Créer compte</button>
+    </fieldset>
+  </form>
+  {{range $key, $value := .Errors}}
+  <div class="error">{{ $key }} : {{ $value }}</div>
+  {{ end }}
+  {{ end }}
 </div>
 <style>
-  #container {
+  #form-container {
     display: flex;
     width: 50%;
     height: 500px;
     margin: 0 auto;
     border: 1px solid black;
-  }
-  #left,
-  #right {
-    height: 100%;
-    flex: 1;
-    display: flex;
+    background: rgb(209, 207, 207);
     flex-direction: column;
     justify-content: center;
     align-items: center;
+  }
+
+  .button {
+    font-size: 1rem;
+    font-weight: bold;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    color: white;
+    background: rgb(3, 165, 193);
+  }
+
+  legend {
+    font-size: 2rem;
+    font-weight: bold;
+  }
+  input,
+  label {
+    font-size: 1.5rem;
+    margin-left: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  label {
+    display: inline-block;
+    width: 150px;
+  }
+
+  @media screen and (max-width: 650px) {
+    #form-container {
+      width: 100%;
+    }
   }
 </style>
 {{ end }}

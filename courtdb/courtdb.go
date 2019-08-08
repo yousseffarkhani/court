@@ -54,6 +54,7 @@ func InitialMigration() (*gorm.DB, error) {
 	}
 	db.AutoMigrate(&model.Court{})
 	db.AutoMigrate(&model.User{})
+	db.AutoMigrate(&model.Comment{})
 	return db, nil
 }
 
@@ -102,7 +103,7 @@ func (db *CourtStore) AddCourt(newCourt model.Court) error {
 		fmt.Println("New court successfully created")
 		return nil
 	}
-	return duplicateError{"This court already exists"}
+	return customError{"This court already exists"}
 }
 
 func (db *CourtStore) GetAllCourts() []model.Court {
@@ -121,7 +122,7 @@ func (db *CourtStore) GetCourtByName(name string) (model.Court, error) {
 	var court model.Court
 	db.db.Where("name=?", name).Find(&court)
 	if (court == model.Court{}) {
-		return model.Court{}, duplicateError{"This court doesn't exist"}
+		return model.Court{}, customError{"This court doesn't exist"}
 	}
 	return court, nil
 }
@@ -133,22 +134,77 @@ func (db *CourtStore) AddUser(newUser model.User) error {
 		fmt.Println("New user successfully created")
 		return nil
 	}
-	return duplicateError{"This username already exists"}
+	return customError{"This username already exists"}
 }
 
 func (db *CourtStore) GetUser(username string) (model.User, error) {
 	var user model.User
 	db.db.Where("username=?", username).Find(&user)
 	if (user == model.User{}) {
-		return model.User{}, duplicateError{"This username doesn't exist"}
+		return model.User{}, customError{"This username doesn't exist"}
 	}
 	return user, nil
 }
 
-type duplicateError struct {
+/* Comment CRUD methods */
+func (db *CourtStore) AddComment(newComment model.Comment) error {
+	if err := db.db.Create(&newComment).Error; err != nil {
+		return customError{"Couldn't add comment."}
+	}
+	fmt.Println("New comment added successfully")
+	return nil
+}
+
+func (db *CourtStore) GetComments(id int) ([]model.Comment, error) {
+	var comments []model.Comment
+	err := db.db.Where("court_id=?", id).Find(&comments).Error
+	if err != nil {
+		return comments, customError{"Couldn't retrieve comments."}
+	}
+	return comments, nil
+}
+
+func (db *CourtStore) GetComment(commentId int) (model.Comment, error) {
+	var comment model.Comment
+	err := db.db.Where("id=?", commentId).Find(&comment).Error
+	if gorm.IsRecordNotFoundError(err) {
+		return comment, customError{"Comment doesn't exist."}
+	} else if err != nil {
+		return comment, customError{"Couldn't retrieve comment."}
+	}
+	return comment, nil
+}
+
+func (db *CourtStore) DeleteComment(id uint) error {
+	comment, err := db.GetComment(int(id))
+	if err != nil {
+		return err
+	} //TODO : Add court_id as criteria
+	if err := db.db.Unscoped().Where("id=?", id).Delete(&comment).Error; err != nil {
+		return customError{"Couldn't delete comment."}
+	}
+	fmt.Println("Comment successfully deleted")
+	return nil
+}
+
+func (db *CourtStore) UpdateComment(updatedMessage model.Comment) error {
+	comment, err := db.GetComment(int(updatedMessage.ID))
+	if err != nil {
+		return err
+	}
+	comment.Message = updatedMessage.Message
+	if err := db.db.Save(&comment).Error; err != nil {
+		return customError{"Couldn't update comment."}
+	}
+	fmt.Println("Comment successfully updated")
+	return nil
+}
+
+/* Utils */
+type customError struct {
 	description string
 }
 
-func (err duplicateError) Error() string {
+func (err customError) Error() string {
 	return err.description
 }

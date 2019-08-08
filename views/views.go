@@ -15,6 +15,17 @@ type View struct {
 	Layout   string
 }
 
+var Pages = make(map[string]*View)
+
+func init() {
+	Pages["index"] = NewView("main", "views/index.html")
+	Pages["login"] = NewView("main", "views/login.html")
+	Pages["signup"] = NewView("main", "views/signup.html")
+	Pages["courtDetails"] = NewView("main", "views/court.html")
+	Pages["newCourt"] = NewView("main", "views/newCourt.html")
+	Pages["contact"] = NewView("main", "views/contact.html")
+}
+
 func NewView(layout string, files ...string) *View {
 	files = append(files, layoutFiles()...)
 	tmpl := template.Must(template.ParseFiles(files...))

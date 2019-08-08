@@ -1,18 +1,67 @@
 {{ define "yield"}}
-<form action="/courts/new" method="POST">
+<div id="form-container">
+  {{if .ActionDone}}
+      <div class="success">Terrain crée</div> <!-- TODO: Changer le wording ("terrain soumis")lorsque la page admin sera OK --> 
+  {{ end }}
+  <form action="/court/new" method="POST">
     <fieldset>
       <legend>Créer un nouveau terrain</legend>
-      <label for="name">Nom </label>
-      <input type="text" name="name" />
+      <label for="name">Nom</label>
+      <input type="text" name="name" value="{{.Ressource.Name}}" />
       <br />
-      <label for="adress">Adresse </label>
-      <input type="text" name="adress" />
+      <label for="adress">Adresse</label>
+      <input type="text" name="adress" value="{{.Ressource.Adress}}"/><br />
+      <button class="button" type="submit">Soumettre nouveau terrain</button>
     </fieldset>
-
-    <button type="submit">Soumettre nouveau terrain</button>
   </form>
-  {{range $key, $value := .}}
+  {{range $key, $value := .Errors}}
   <div class="error">{{$key}} : {{$value}}</div>
 {{end}}
+
 </div>
+</div>
+<style>
+    #form-container {
+      display: flex;
+      width: 50%;
+      height: 500px;
+      margin: 0 auto;
+      border: 1px solid black;
+      background: rgb(209, 207, 207);
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+  
+    .button {
+      font-size: 1rem;
+      font-weight: bold;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      color: white;
+      background: rgb(3, 165, 193);
+    }
+  
+    legend {
+      font-size: 2rem;
+      font-weight: bold;
+    }
+    input,
+    label {
+      font-size: 1.5rem;
+      margin-left: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+  
+    label {
+      display: inline-block;
+      width: 150px;
+    }
+  
+    @media screen and (max-width: 650px) {
+      #form-container {
+        width: 100%;
+      }
+    }
+  </style>
 {{ end }}

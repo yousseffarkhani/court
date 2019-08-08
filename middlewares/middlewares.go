@@ -58,6 +58,7 @@ func isAuthorized(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		userLogged, ok := context.Get(r, "userLogged").(bool)
 		if userLogged == false || !ok {
+			fmt.Println("Access denied")
 			http.Redirect(w, r, "/login", http.StatusFound)
 			return
 		}

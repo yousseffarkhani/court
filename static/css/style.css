@@ -30,44 +30,16 @@ section {
   height: 100%;
 }
 
-/* CSS for main.html */
-
-header {
-  background-color: grey;
-  padding: 1rem;
-  width: 100%;
-  margin: 0 auto;
-  display: flex;
-  margin-bottom: 1rem;
-  position: sticky;
-  top: 0px;
-  z-index: 1;
-}
-
-#title {
-  color: white;
-  font-size: 2rem;
-}
-
-#search-form {
-  display: flex;
-}
-
-#input {
-  width: 300px;
-  text-align: center;
-}
-
-#searchBtn {
-  margin-left: 0.5rem;
-}
-
 .error {
   color: red;
 }
 
+.success {
+  color: green;
+}
+
 /* CSS for index.html */
-#courts-container {
+/* #courts-container {
   width: 90%;
   margin: 0 auto;
   display: grid;
@@ -91,7 +63,7 @@ header {
 .card-title {
   padding: 1rem 0;
   font-size: 1.2rem;
-}
+} */
 
 /* CSS for court.html */
 

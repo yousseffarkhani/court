@@ -1,4 +1,42 @@
 {{ define "yield"}}
+<style>
+  #courts-container {
+    width: 90%;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+  }
+
+  .card-body {
+    width: 80%;
+    color: black;
+    border: 1px solid black;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-items: center;
+    align-items: center;
+    cursor: pointer;
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .card-title {
+    padding: 1rem 0;
+    font-size: 1.2rem;
+  }
+  @media screen and (max-width: 1280px) {
+    #courts-container {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  @media screen and (max-width: 930px) {
+    #courts-container {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+</style>
 <div id="courts-container"></div>
 
 <script>

@@ -19,6 +19,21 @@ type Court struct {
 }
 
 type User struct {
+	gorm.Model
 	Username string `json:"username" gorm:"primary_key"`
 	Password string `json:"password"`
+}
+
+type TemplateData struct {
+	Ressource  interface{}
+	Errors     map[string]string
+	ActionDone bool
+}
+
+type Comment struct {
+	gorm.Model
+	Message string `json:"message"`
+	CourtID int    `json:"courtid"`
+	// TODO : Author
+	// Date
 }

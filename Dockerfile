@@ -22,6 +22,12 @@ RUN ln -s /go/src/app/model/model.go /go/src/model/model.go
 # middlewares package
 RUN mkdir /go/src/middlewares
 RUN ln -s /go/src/app/middlewares/middlewares.go /go/src/middlewares/middlewares.go
+# contactMail package
+RUN mkdir /go/src/contactMail
+RUN ln -s /go/src/app/contactMail/contactMail.go /go/src/contactMail/contactMail.go
+# handlers package
+RUN mkdir /go/src/handlers
+RUN ln -s /go/src/app/handlers/handlers.go /go/src/handlers/handlers.go
 
 # Downloads all dependecies
 RUN go get ./

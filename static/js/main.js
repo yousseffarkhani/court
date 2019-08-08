@@ -27,7 +27,7 @@ function notFound(){
 
 function createCard(court) {
     const card = document.createElement("a");
-    card.href = `/courts/${court.ID}`;
+    card.href = `/court/${court.ID}`;
     card.innerHTML = `
         <div class="card-body">
             <h4 class="card-title">${court.nom}</h4>
