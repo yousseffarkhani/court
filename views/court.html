@@ -12,7 +12,7 @@
   </ul>
   <div id="map"></div>
 </div>
-<form>
+<form action="/court/{{.ID }}/comment/new" method="POST">
   <fieldset>
     <legend>Ajouter un commentaire</legend>
     <label for="message">Commentaire</label>
@@ -117,22 +117,22 @@
       });
     }
 
-    submitButton.addEventListener("click", function(event) {
-      fetch("/court/{{.ID }}/comment/new", {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ message: message.value.trim() })
-      }).then(res => {
-        if (res.status === 201) {
-          message.value = ""; // TODO: Add pop up comment posted
-        } else {
-          // TODO: Error message
-        }
-      });
-    });
+    // submitButton.addEventListener("click", function(event) {
+    //   fetch("/court/{{.ID }}/comment/new", {
+    //     method: "POST",
+    //     headers: {
+    //       Accept: "application/json",
+    //       "Content-Type": "application/json"
+    //     },
+    //     body: JSON.stringify({ message: message.value.trim() })
+    //   }).then(res => {
+    //     if (res.status === 201) {
+    //       message.value = ""; // TODO: Add pop up comment posted
+    //     } else {
+    //       // TODO: Error message
+    //     }
+    //   });
+    // });
 </script>
 
 {{ end }}

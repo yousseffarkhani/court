@@ -85,24 +85,27 @@ func (server *BasketServer) addComment(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+	message := strings.TrimSpace(r.FormValue("message"))
 
-	var comment model.Comment
-	err = json.NewDecoder(r.Body).Decode(&comment)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+	comment := model.Comment{
+		Message: message,
 	}
-	comment.CourtID = id
-	if comment.Message == "" { // TODO: Vérification de l'input
+
+	errors := extractEmptyFieldErrors(comment)
+
+	if len(errors) > 0 {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+
+	comment.CourtID = id
 	err = server.store.AddComment(comment)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	w.WriteHeader(http.StatusCreated)
+	http.Redirect(w, r, fmt.Sprintf("/court/%d", id), http.StatusFound)
+	// w.WriteHeader(http.StatusCreated)
 }
 
 func (server *BasketServer) getComments(w http.ResponseWriter, r *http.Request) {
