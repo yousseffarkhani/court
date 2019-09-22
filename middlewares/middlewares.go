@@ -119,7 +119,7 @@ func GenerateJWT(username string) (string, time.Time, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := token.SignedString(jwtKey)
 	if err != nil {
-		fmt.Println("Something went wrong: %s", err)
+		fmt.Println("Something went wrong: %v", err)
 		return "", time.Time{}, err
 	}
 	return tokenString, expirationTime, nil

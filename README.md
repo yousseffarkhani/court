@@ -1,22 +1,19 @@
 # TODOs :
-
+- postSignUpHandler
 - Comments should only be modified and deleted by the comment's owner
 - Testing
 - Amélioration du code
 - Finir les TODOs
 - Déployer
-- Remplacer "github.com/yousseffarkhani/court/courtdb"
-  "github.com/yousseffarkhani/court/views" par views / courtdb / ...
 - Voir https://data.iledefrance.fr/explore/dataset/20170419_res_fichesequipementsactivites/information/?disjunctive.actlib
 
 # Commandes
 
-Create .env file with 3 variables (APP_ENV, POSTGRES_USER, POSTGRES_PASSWORD)
+Create .env file with 2 variables (POSTGRES_USER, POSTGRES_PASSWORD)
 
 - Launch project in dev mode :
 
-1. Delete APP_ENV from .env file.
-2. `docker-compose up --build`
+1. `docker-compose up --build`
 
 - Launch project in production mode :
 

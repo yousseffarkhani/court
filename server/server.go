@@ -3,18 +3,14 @@ package server
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
-	"reflect"
 	"strconv"
 	"strings"
 
-	"contactMail"
-	"courtdb"
-	"handlers"
-	"middlewares"
-	"model"
-	"views"
+	"github.com/yousseffarkhani/court/database"
+	"github.com/yousseffarkhani/court/middlewares"
+	"github.com/yousseffarkhani/court/model"
+	"github.com/yousseffarkhani/court/views"
 
 	"github.com/gorilla/mux"
 
@@ -25,13 +21,13 @@ const JsonContentType = "application/json"
 const HtmlContentType = "text/html"
 
 type BasketServer struct {
-	store *courtdb.CourtStore
+	database *database.CourtStore
 	http.Handler
 }
 
-func NewBasketServer(store *courtdb.CourtStore) (*BasketServer, error) {
+func NewBasketServer(database *database.CourtStore) (*BasketServer, error) {
 	server := new(BasketServer)
-	server.store = store
+	server.database = database
 	router := newRouter(server)
 	server.Handler = router
 	return server, nil
@@ -45,19 +41,19 @@ func newRouter(server *BasketServer) *mux.Router {
 
 	router.Handle("/", loggedMiddleware.ThenFunc(server.indexHandler)).Methods(http.MethodGet)
 
-	router.Handle("/contact", loggedMiddleware.ThenFunc(handlers.ContactGetHandler)).Methods(http.MethodGet)
-	router.HandleFunc("/contact", ContactPostHandler).Methods(http.MethodPost)
+	router.Handle("/contact", loggedMiddleware.ThenFunc(getContactHandler)).Methods(http.MethodGet)
+	router.HandleFunc("/contact", postContactHandler).Methods(http.MethodPost)
 
-	router.Handle("/login", loggedMiddleware.ThenFunc(handlers.LoginHandler)).Methods(http.MethodGet)
+	router.Handle("/login", loggedMiddleware.ThenFunc(LoginHandler)).Methods(http.MethodGet)
+	router.Handle("/signup", loggedMiddleware.ThenFunc(getSignupHandler)).Methods(http.MethodGet)
+	router.HandleFunc("/signup", server.postSignupHandler).Methods(http.MethodPost)
 	router.HandleFunc("/signin", server.signinHandler).Methods(http.MethodPost)
-	router.Handle("/signup", loggedMiddleware.ThenFunc(handlers.SignupHandler)).Methods(http.MethodGet)
-	router.HandleFunc("/signup", server.signupHandler).Methods(http.MethodPost)
-	router.HandleFunc("/logout", handlers.Logout).Methods(http.MethodGet)
+	router.HandleFunc("/logout", Logout).Methods(http.MethodGet)
 
-	router.Handle("/court/new", authorizationMiddleware.ThenFunc(handlers.NewCourtHandler)).Methods(http.MethodGet)
-	router.Handle("/court/new", authorizationMiddleware.ThenFunc(server.newCourtHandler)).Methods(http.MethodPost)
-	router.Handle("/court/{id}", loggedMiddleware.ThenFunc(server.getCourtHandler)).Methods(http.MethodGet)
-	router.HandleFunc("/api/courts", server.getAllCourtsHandler).Methods(http.MethodGet)
+	router.Handle("/court/new", authorizationMiddleware.ThenFunc(NewCourtHandler)).Methods(http.MethodGet)
+	router.Handle("/court/new", authorizationMiddleware.ThenFunc(server.APINewCourt)).Methods(http.MethodPost)
+	router.Handle("/court/{id}", loggedMiddleware.ThenFunc(server.APIGetCourt)).Methods(http.MethodGet)
+	router.HandleFunc("/api/courts", server.APIGetAllCourts).Methods(http.MethodGet)
 
 	router.HandleFunc("/court/{id}/comment", server.getComments).Methods(http.MethodGet)
 	// router.Handle("/court/{id}/comment", authorizationMiddleware.ThenFunc(server.addComment)).Methods(http.MethodPost)
@@ -99,7 +95,7 @@ func (server *BasketServer) addComment(w http.ResponseWriter, r *http.Request) {
 	}
 
 	comment.CourtID = id
-	err = server.store.AddComment(comment)
+	err = server.database.AddComment(comment)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -116,7 +112,7 @@ func (server *BasketServer) getComments(w http.ResponseWriter, r *http.Request) 
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	comments, err := server.store.GetComments(id)
+	comments, err := server.database.GetComments(id)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -131,7 +127,7 @@ func (server *BasketServer) deleteComment(w http.ResponseWriter, r *http.Request
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	err = server.store.DeleteComment(comment.ID)
+	err = server.database.DeleteComment(comment.ID)
 	if err != nil {
 		if err.Error() == "Comment doesn't exist." {
 			w.WriteHeader(http.StatusBadRequest)
@@ -151,7 +147,7 @@ func (server *BasketServer) updateComment(w http.ResponseWriter, r *http.Request
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-	err = server.store.UpdateComment(comment)
+	err = server.database.UpdateComment(comment)
 	if err != nil {
 		if err.Error() == "Comment doesn't exist." {
 			w.WriteHeader(http.StatusBadRequest)
@@ -161,52 +157,6 @@ func (server *BasketServer) updateComment(w http.ResponseWriter, r *http.Request
 		return
 	}
 	w.WriteHeader(http.StatusOK)
-}
-
-func (server *BasketServer) signupHandler(w http.ResponseWriter, r *http.Request) {
-	userInput, inputErrors := getInput(w, r)
-
-	templateData := model.TemplateData{
-		ActionDone: false,
-		Errors:     inputErrors,
-		Ressource:  userInput.Username,
-	}
-	if len(inputErrors) > 0 {
-		err := views.Pages["signup"].Render(w, r, templateData)
-		if err != nil {
-			http.Redirect(w, r, "/signup", http.StatusFound)
-		}
-		return
-	}
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(userInput.Password), 8)
-	if err != nil {
-		http.Redirect(w, r, "/signup", http.StatusFound)
-		return
-	}
-
-	newUser := model.User{
-		Username: userInput.Username,
-		Password: string(hashedPassword),
-	}
-
-	err = server.store.AddUser(newUser)
-	if err != nil {
-		errors := make(map[string]string)
-		errors["Error"] = err.Error()
-		templateData.Errors = errors
-		err := views.Pages["signup"].Render(w, r, templateData)
-		if err != nil {
-			http.Redirect(w, r, "/signup", http.StatusFound)
-		}
-		return
-	}
-
-	middlewares.SetJwtCookie(w, newUser.Username)
-	templateData.ActionDone = true
-	err = views.Pages["signup"].Render(w, r, templateData)
-	if err != nil {
-		http.Redirect(w, r, "/signup", http.StatusFound)
-	}
 }
 
 func (server *BasketServer) signinHandler(w http.ResponseWriter, r *http.Request) {
@@ -219,12 +169,11 @@ func (server *BasketServer) signinHandler(w http.ResponseWriter, r *http.Request
 		}
 		return
 	}
-	user, err := server.store.GetUser(userInput.Username)
+	user, err := server.database.GetUser(userInput.Username)
 	if err != nil {
 		errors := [1]string{err.Error()}
 		err := views.Pages["login"].Render(w, r, errors)
 		if err != nil {
-
 			http.Redirect(w, r, "/login", http.StatusFound)
 		}
 		return
@@ -243,150 +192,8 @@ func (server *BasketServer) signinHandler(w http.ResponseWriter, r *http.Request
 	redirectToIndex(w, r)
 }
 
-func (server *BasketServer) indexHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", HtmlContentType)
-	courts := server.store.GetAllCourts()
-	courtsBytes, err := json.MarshalIndent(courts, "", " ")
-	CheckError(err)
-	err = views.Pages["index"].Render(w, r, string(courtsBytes))
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-}
-
-/* Court Handlers */
-func (server *BasketServer) getAllCourtsHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-type", JsonContentType)
-	courts := server.store.GetAllCourts()
-	CheckError(json.NewEncoder(w).Encode(courts))
-}
-
-func (server *BasketServer) getCourtHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", HtmlContentType)
-	vars := mux.Vars(r)
-	id, err := strconv.Atoi(vars["id"])
-	if err != nil {
-		redirectToIndex(w, r)
-	}
-	court := server.store.GetCourt(id)
-	if court.ID == 0 {
-		redirectToIndex(w, r)
-	}
-	err = views.Pages["courtDetails"].Render(w, r, court)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-}
-
-func (server *BasketServer) newCourtHandler(w http.ResponseWriter, r *http.Request) {
-	courtInput := model.Court{
-		Name:           strings.TrimSpace(r.FormValue("name")),
-		Url:            "court.Url",
-		Adress:         strings.TrimSpace(r.FormValue("adress")),
-		Arrondissement: "court.Arrondissement",
-		Longitude:      "court.Longitude",
-		Lattitude:      "court.Lattitude",
-		Dimensions:     "court.Dimensions",
-		Revetement:     "court.Revetement",
-		Decouvert:      "court.Decouvert",
-		Eclairage:      "court.Eclairage",
-	}
-
-	errors := extractEmptyFieldErrors(courtInput)
-
-	templateData := model.TemplateData{
-		ActionDone: false,
-		Errors:     errors,
-		Ressource:  courtInput,
-	}
-
-	if len(errors) > 0 {
-		err := views.Pages["newCourt"].Render(w, r, templateData)
-		if err != nil {
-			http.Redirect(w, r, "/signup", http.StatusFound)
-		}
-		return
-	}
-
-	err := server.store.AddCourt(courtInput)
-	if err != nil {
-		errors := make(map[string]string)
-		errors["Error"] = err.Error()
-		templateData.Errors = errors
-		err := views.Pages["newCourt"].Render(w, r, templateData)
-		if err != nil {
-			http.Redirect(w, r, "/courts/new", http.StatusFound)
-		}
-		return
-	}
-
-	templateData.ActionDone = true
-	err = views.Pages["newCourt"].Render(w, r, templateData)
-	if err != nil {
-		http.Redirect(w, r, "/courts/new", http.StatusFound)
-	}
-}
-
-/* Contact handler */
-func ContactPostHandler(w http.ResponseWriter, r *http.Request) {
-	newContact := contactMail.Contact{
-		Name:    strings.TrimSpace(r.FormValue("name")),
-		Subject: strings.TrimSpace(r.FormValue("subject")),
-		Email:   strings.TrimSpace(r.FormValue("email")),
-		Message: strings.TrimSpace(r.FormValue("message")),
-	}
-
-	errors := extractEmptyFieldErrors(newContact)
-
-	templateData := model.TemplateData{
-		ActionDone: false,
-		Errors:     errors,
-		Ressource:  newContact,
-	}
-
-	if len(errors) > 0 {
-		err := views.Pages["contact"].Render(w, r, templateData)
-		if err != nil {
-			http.Redirect(w, r, "/contact", http.StatusFound)
-		}
-		return
-	}
-
-	err := contactMail.SendMail(newContact)
-	if err != nil {
-		errors := map[string]string{
-			"errMail": err.Error(),
-		}
-		templateData.Errors = errors
-		err := views.Pages["contact"].Render(w, r, templateData)
-		if err != nil {
-			http.Redirect(w, r, "/contact", http.StatusFound)
-		}
-		return
-	}
-
-	fmt.Println("Email sent")
-	templateData.ActionDone = true
-	err = views.Pages["contact"].Render(w, r, templateData)
-	if err != nil {
-		http.Redirect(w, r, "/contact", http.StatusFound)
-	}
-}
-
 /* Utils */
-func extractEmptyFieldErrors(data interface{}) map[string]string {
-	errors := make(map[string]string)
-	value := reflect.ValueOf(data)
-	typeOfData := value.Type()
-	if value.Kind() == reflect.Struct {
-		for i := 0; i < value.NumField(); i++ {
-			if value.Field(i).String() == "" {
-				errors[typeOfData.Field(i).Name] = "Empty field"
-			}
-		}
-	}
-	return errors
-}
+
 func getInput(w http.ResponseWriter, r *http.Request) (model.User, map[string]string) {
 	username := strings.TrimSpace(r.FormValue("username"))
 	password := strings.TrimSpace(r.FormValue("password"))
@@ -403,16 +210,6 @@ func getInput(w http.ResponseWriter, r *http.Request) (model.User, map[string]st
 	}
 
 	return userInput, nil
-}
-
-func CheckError(err error) {
-	if err != nil {
-		log.Fatalln(err)
-	}
-}
-
-func redirectToIndex(w http.ResponseWriter, r *http.Request) {
-	http.Redirect(w, r, "/", http.StatusFound)
 }
 
 func serveCss(w http.ResponseWriter, r *http.Request) {

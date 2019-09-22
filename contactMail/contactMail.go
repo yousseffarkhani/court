@@ -40,7 +40,7 @@ func SendMail(contact Contact) error {
 	body.Write([]byte(fmt.Sprintf("To: %s\r\n"+"Subject: %s\n%s\n\n", recipientAddress[0], contact.Subject, headers)))
 
 	t.Execute(&body, contact)
-	// fmt.Println(body.String())
+
 	err = smtp.SendMail(host+":"+port, auth, MAIL_USERNAME, recipientAddress, body.Bytes())
 	if err != nil {
 		err = emailErr{

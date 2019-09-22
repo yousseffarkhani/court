@@ -1,11 +1,14 @@
 package views
 
 import (
+	"encoding/json"
+	"fmt"
 	"net/http"
 	"path/filepath"
 	"text/template"
 
 	"github.com/gorilla/context"
+	"github.com/yousseffarkhani/court/model"
 )
 
 const LayoutDir = "views/layouts"
@@ -56,4 +59,16 @@ func (v *View) Render(w http.ResponseWriter, r *http.Request, data interface{}) 
 type RenderingData struct {
 	Data       interface{}
 	UserLogged bool
+}
+
+func RenderIndex(w http.ResponseWriter, r *http.Request, courts model.Courts) error {
+	courtsBytes, err := json.MarshalIndent(courts, "", " ")
+	if err != nil {
+		return fmt.Errorf("Problem encoding to JSON, %v", err)
+	}
+	err = Pages["index"].Render(w, r, string(courtsBytes))
+	if err != nil {
+		return fmt.Errorf("Problem encoding to JSON, %v", err)
+	}
+	return nil
 }

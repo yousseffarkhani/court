@@ -1,6 +1,10 @@
 package model
 
 import (
+	"encoding/json"
+	"fmt"
+	"io"
+
 	"github.com/jinzhu/gorm"
 )
 
@@ -16,6 +20,17 @@ type Court struct {
 	Revetement     string `json:"revetement"`
 	Decouvert      string `json:"decouvert"`
 	Eclairage      string `json:"eclairage"`
+}
+
+type Courts []Court
+
+func NewCourts(input io.Reader) (Courts, error) {
+	var courts Courts
+	err := json.NewDecoder(input).Decode(&courts)
+	if err != nil {
+		err = fmt.Errorf("problem parsing courts, %v", err)
+	}
+	return courts, err
 }
 
 type User struct {
