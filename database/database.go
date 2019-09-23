@@ -2,9 +2,11 @@ package database
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/yousseffarkhani/court/model"
+	"golang.org/x/crypto/bcrypt"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
@@ -49,6 +51,19 @@ func (db *CourtStore) initData(file *os.File) error {
 	for _, court := range courts {
 		db.AddCourt(court)
 	}
+
+	// TODO : Delete when finished
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte("a"), 8)
+	if err != nil {
+		log.Fatalf("Problem")
+	}
+
+	newUser := model.User{
+		Username: "a",
+		Password: string(hashedPassword),
+	}
+	db.AddUser(newUser)
+
 	return nil
 }
 

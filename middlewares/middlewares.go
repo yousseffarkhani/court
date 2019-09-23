@@ -38,6 +38,7 @@ func Use(mw ...Middleware) Middleware {
 
 func isLogged(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Println("verify if logged")
 		c, err := r.Cookie("Token")
 		if err != nil {
 			context.Set(r, "userLogged", false)
@@ -56,8 +57,9 @@ func isLogged(next http.Handler) http.Handler {
 
 func isAuthorized(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Println("verify if authorized")
 		userLogged, ok := context.Get(r, "userLogged").(bool)
-		if userLogged == false || !ok {
+		if !userLogged || !ok {
 			fmt.Println("Access denied")
 			http.Redirect(w, r, "/login", http.StatusFound)
 			return
@@ -68,6 +70,7 @@ func isAuthorized(next http.Handler) http.Handler {
 
 func refreshToken(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Println("Refresh token")
 		claims, ok := context.Get(r, "claims").(*Claims)
 		if ok {
 			if time.Unix(claims.ExpiresAt, 0).Sub(time.Now()) < 5*time.Minute {
@@ -105,6 +108,7 @@ func SetJwtCookie(w http.ResponseWriter, username string) {
 		Name:    "Token",
 		Value:   validToken,
 		Expires: expirationTime,
+		Raw:     "George",
 	})
 }
 
@@ -119,7 +123,7 @@ func GenerateJWT(username string) (string, time.Time, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := token.SignedString(jwtKey)
 	if err != nil {
-		fmt.Println("Something went wrong: %v", err)
+		fmt.Printf("Something went wrong: %v", err)
 		return "", time.Time{}, err
 	}
 	return tokenString, expirationTime, nil

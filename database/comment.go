@@ -25,9 +25,9 @@ func (db *CourtStore) GetComments(id int) ([]model.Comment, error) {
 	return comments, nil
 }
 
-func (db *CourtStore) GetComment(commentId int) (model.Comment, error) {
+func (db *CourtStore) GetComment(courtID, commentID int) (model.Comment, error) {
 	var comment model.Comment
-	err := db.Where("id=?", commentId).Find(&comment).Error
+	err := db.Where("court_id=? AND id=? ", courtID, commentID).Find(&comment).Error
 	if gorm.IsRecordNotFoundError(err) {
 		return comment, customError{"Comment doesn't exist."}
 	} else if err != nil {
@@ -36,24 +36,20 @@ func (db *CourtStore) GetComment(commentId int) (model.Comment, error) {
 	return comment, nil
 }
 
-func (db *CourtStore) DeleteComment(id uint) error {
-	comment, err := db.GetComment(int(id))
-	if err != nil {
-		return err
-	} //TODO : Add court_id as criteria
-	if err := db.Unscoped().Where("id=?", id).Delete(&comment).Error; err != nil {
+func (db *CourtStore) DeleteComment(courtID, commentID int) error {
+	if err := db.Unscoped().Where("court_id=? AND id=? ", courtID, commentID).Delete(&model.Comment{}).Error; err != nil {
 		return customError{"Couldn't delete comment."}
 	}
 	fmt.Println("Comment successfully deleted")
 	return nil
 }
 
-func (db *CourtStore) UpdateComment(updatedMessage model.Comment) error {
-	comment, err := db.GetComment(int(updatedMessage.ID))
+func (db *CourtStore) UpdateComment(courtID, commentID int, message string) error {
+	comment, err := db.GetComment(courtID, commentID)
 	if err != nil {
 		return err
 	}
-	comment.Message = updatedMessage.Message
+	comment.Message = message
 	if err := db.Save(&comment).Error; err != nil {
 		return customError{"Couldn't update comment."}
 	}

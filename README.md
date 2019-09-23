@@ -1,6 +1,4 @@
 # TODOs :
-- postSignUpHandler
-- Comments should only be modified and deleted by the comment's owner
 - Testing
 - Amélioration du code
 - Finir les TODOs

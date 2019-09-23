@@ -16,8 +16,8 @@ func (db *CourtStore) AddCourt(newCourt model.Court) error {
 	return customError{"This court already exists"}
 }
 
-func (db *CourtStore) GetAllCourts() []model.Court {
-	var courts []model.Court
+func (db *CourtStore) GetAllCourts() model.Courts {
+	var courts model.Courts
 	db.Find(&courts)
 	return courts
 }

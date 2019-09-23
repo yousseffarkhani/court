@@ -17,122 +17,110 @@
     <legend>Ajouter un commentaire</legend>
     <label for="message">Commentaire</label>
     <input type="text" name="message" id="message" />
-    <button type="submit" id="add-comment">Ajouter</button>
+    <button type="submit">Ajouter</button>
   </fieldset>
 </form>
 <ul id="comments"></ul>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBl13ydompVLpuZd_F727LIu89toMGP2nY"></script>
 <script>
-    /* Displays map */
-    const createMap = (coordinates, element, adresse) => {
-      const map = new google.maps.Map(element, {
-        center: coordinates,
-        zoom: 13
-      });
-      const marker = new google.maps.Marker({
-        position: coordinates,
-        map: map
-      });
-      const infoWindow = new google.maps.InfoWindow({
-        content: adresse
-      });
-      infoWindow.open(map, marker);
-    };
-    createMap(
-      { lat: +{{ .Lattitude}}, lng: +{{ .Longitude}} },
-      document.querySelector("#map"),
-      "{{ .Adress }}"
-    );
+  /* Displays map */
+  const createMap = (coordinates, element, adresse) => {
+    const map = new google.maps.Map(element, {
+      center: coordinates,
+      zoom: 13
+    });
+    const marker = new google.maps.Marker({
+      position: coordinates,
+      map: map
+    });
+    const infoWindow = new google.maps.InfoWindow({
+      content: adresse
+    });
+    infoWindow.open(map, marker);
+  };
+  createMap(
+    { lat: +{{ .Lattitude }}, lng: +{{ .Longitude }} },
+    document.querySelector("#map"),
+    "{{ .Adress }}"
+  );
 
 
   /* Handle comments */
-    const submitButton = document.querySelector("#add-comment");
-    const message = document.querySelector("input#message");
-    const commentsUl = document.querySelector("#comments");
+  const message = document.querySelector("input#message");
+  const commentsUl = document.querySelector("#comments");
 
-    fetch("/court/{{.ID }}/comment")
-      .then(res => res.json())
-      .then(comments => {
-        if (comments.length === 0) {
-          li = document.createElement("li");
-          li.innerText = "There are no comments";
-          commentsUl.appendChild(li);
-        } else {
-          comments.map(comment => addComment(comment));
-        }
-      });
+  fetch("/court/{{.ID }}/comment")
+    .then(res => res.json())
+    .then(comments => {
+      if (comments.length === 0) {
+        li = document.createElement("li");
+        li.innerText = "There are no comments";
+        commentsUl.appendChild(li);
+      } else {
+        comments.map(comment => addComment(comment));
+      }
+    });
 
-    const addComment = comment => {
-      li = document.createElement("li"); // TODO Add author
-      li.id = "li" + comment.ID;
-      li.innerHTML = `<h1>Author</h1>
+  const addComment = comment => {
+    li = document.createElement("li");
+    li.id = "li" + comment.ID;
+    if (comment.isAuthor) {
+      text = `<h1>${comment.author}</h1>
       <p>${comment.message}</p>
       <button onclick="modifyComment(${comment.ID})">Modify comment</button>
       <button onclick="deleteComment(${comment.ID})">Delete comment</button>
       `;
-      commentsUl.appendChild(li);
-    };
+    } else {
+      text = `<h1>${comment.author}</h1>
+      <p>${comment.message}</p>
+      `;
+    }
+    li.innerHTML = text
+    commentsUl.appendChild(li);
+  };
 
-    function deleteComment(commentId) {
-      fetch("/court/{{.ID }}/comment/delete", {
+  function deleteComment(commentId) {
+    fetch(`/court/{{.ID }}/comment/${commentId}/delete`, {
+      method: "POST"
+    }).then(res => {
+      if (res.status === 202) {
+        window.location.reload();
+      } else {
+        console.log("error")
+      }
+    });
+  }
+
+  function modifyComment(commentId) {
+    const comment = document.querySelector(`#li${commentId}`);
+    const p = comment.querySelector("p")
+    const input = document.createElement("input");
+    input.value = p.innerText
+    comment.removeChild(p)
+    comment.removeChild(comment.querySelector("button"))
+    comment.removeChild(comment.querySelector("button"))
+
+    const sub = document.createElement("button");
+    sub.innerText = "Modifier";
+    comment.appendChild(input);
+    comment.appendChild(sub);
+    sub.addEventListener("click", () => {
+      fetch(`/court/{{.ID }}/comment/${commentId}/update`, {
         method: "POST",
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ id: commentId })
+        body: JSON.stringify({ id: commentId, message: input.value })
       }).then(res => {
-        if (res.status === 204) {
-          console.log("ok"); // TODO: Add pop up comment posted
+        if (res.status === 202) {
           window.location.reload();
         } else {
-          console.log("ko"); // TODO: Error message
+          console.log("error")
         }
       });
-    }
-
-    function modifyComment(commentId) {
-      const comment = document.querySelector(`#li${commentId} > p`);
-      const input = document.createElement("input");
-      const sub = document.createElement("button");
-      sub.innerText = "sub";
-      comment.appendChild(input);
-      comment.appendChild(sub);
-      sub.addEventListener("click", () => {
-        fetch("/court/{{.ID }}/comment/update", {
-          method: "POST",
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ id: commentId, message: input.value })
-        }).then(res => {
-          if (res.status === 200) {
-            console.log("ok"); // TODO: Add pop up comment posted
-            window.location.reload();
-          } else {
-            console.log("ko"); // TODO: Error message
-          }
-        });
-      });
-    }
-
-    // submitButton.addEventListener("click", function(event) {
-    //   fetch("/court/{{.ID }}/comment/new", {
-    //     method: "POST",
-    //     headers: {
-    //       Accept: "application/json",
-    //       "Content-Type": "application/json"
-    //     },
-    //     body: JSON.stringify({ message: message.value.trim() })
-    //   }).then(res => {
-    //     if (res.status === 201) {
-    //       message.value = ""; // TODO: Add pop up comment posted
-    //     } else {
-    //       // TODO: Error message
-    //     }
-    //   });
-    // });
+    });
+  }
 </script>
 
 {{ end }}

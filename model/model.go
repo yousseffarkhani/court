@@ -47,8 +47,9 @@ type TemplateData struct {
 
 type Comment struct {
 	gorm.Model
-	Message string `json:"message"`
-	CourtID int    `json:"courtid"`
-	// TODO : Author
-	// Date
+	Author   string `json:"author"`
+	Message  string `json:"message"`
+	CourtID  int    `json:"courtid"`
+	IsAuthor bool   `json:"isAuthor"`
+	// TODO : Date
 }
