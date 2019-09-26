@@ -1,59 +1,77 @@
-# TODOs :
+La partie back-end est en pleine refonte (cf. https://github.com/yousseffarkhani/Playground-Back-end).
+N'étant pas satisfait des capacités du templating Golang, je vais ajouter un front-end que je réaliserai à l'aide d'un des 3 frameworks (Angular/React/Vue).
+# TODOs :
+- Vérification de la casse des noms de terrains au moment de les ajouter
+- Ajouter du testing
+- Refactorer le code (DRY, utiliser plus d'interfaces, changer la structure du projet)
+- Finir les TODOs dans le code
 - Testing
 - Amélioration du code
-- Finir les TODOs
-- Déployer
-- Voir https://data.iledefrance.fr/explore/dataset/20170419_res_fichesequipementsactivites/information/?disjunctive.actlib
+- Homogénéiser la langue utilisée (français)
+- ~~Ajouter une fonction permettant de lancer le serveur en https en mode production et sur le port 8080 de localhost en mode dev.~~
+- Automatiser le renouvellement du certificat TLS.
+
+
+# Améliorations
+- Améliorer le front-end
+- Ajouter d'autres jeux de données : https://data.iledefrance.fr/explore/dataset/20170419_res_fichesequipementsactivites/information/?disjunctive.actlib
 
 # Commandes
 
-Create .env file with 2 variables (POSTGRES_USER, POSTGRES_PASSWORD)
+Créer un fichier .env dans la racine du projet avec 2 variables (POSTGRES_USER=XXX, POSTGRES_PASSWORD=XXX)
 
-- Launch project in dev mode :
+- Lancer le projet en mode dev (hot reload) :
 
 1. `docker-compose up --build`
 
-- Launch project in production mode :
+- Lancer le projet en mode production :
 
-1. Add APP_ENV=production to .env file.
+1. Ajouter APP_ENV=production au fichier .env.
 2. `docker-compose up --build`
+
+- Déployer sur AWS
+1. Changer tous les ports sur 443 pour du HTTPS et 80 pour du HTTP.
 
 # Description de l'application
 
 ## Introduction
 
-Court est une application permettant de trouver le terrain de basket le plus proche dans Paris (pour le moment).
+Court est une application permettant de trouver le terrain de basket le plus proche dans Paris.
 Pour cela, les données ont été récupérées depuis plusieurs sources (Open data, web scraping).
 Il est possible de créer un compte permettant de commenter les terrains et d'en soumettre de nouveaux.
 
-## Features
-
+## Fonctionnalités
+Le webscraper produit un fichier JSON qui sert ensuite à peupler la base de données de l'application.
 ### Web Scraper (NodeJS, librairie : puppeteer/cheerio)
 
-- Data scraper (DONE)
+- ~~Data scraper~~
 
 ### Application :
 
-- Liste des terrains parisiens (DONE)
+- ~~Liste des terrains parisiens~~
 - Notation des terrains
-- Commentaires (DONE)
-- Responsive (DONE)
+- ~~Commentaires~~
+- ~~Responsive~~
 - Niveau de jeu des terrains
-- Localisation des terrains (Gmap) (DONE)
-- Description (DONE)
+- ~~Localisation des terrains (Gmap)~~
+- ~~Description des terrains~~
+- Page profil de l'utilisateur
+- ~~Utilisation de JWT pour garder la session active~~
+- ~~Utilisation de PostgreSQL pour enregistrer les utilisateurs, terrains et commentaires~~
 - Mise en place de filtres
 - PWA
-- Soumettre de nouveaux terrains et créer une page admin pour les accepter
+- ~~Soumettre de nouveaux terrains~~ et créer une page admin pour les accepter
 - Photos
 - Réconciliation de données
-- Recherche par arrondissement (DONE)
+- ~~Recherche par arrondissement~~
 - Agenda des terrains et création de communautés
+- ~~Déployer l'application en https~~
 
 ## Intention
 
 - Mettre en oeuvre les connaissances apprises en Golang, NodeJS, docker, HTML et CSS.
-- Réaliser le déploiement d'un site
-- Réaliser un site utile à terme :)
+- Réaliser le déploiement d'un site en HTTPS avec un nom de domaine acheté
+- Réaliser un site utile à terme :-)
 
 ## Remarques
 
@@ -62,23 +80,9 @@ Il est possible de créer un compte permettant de commenter les terrains et d'en
   - API appelées depuis les pages HTML
   - Peuplement des données directement dans les pages HTML. Cela a été fait de manière intentionnelle afin de tester plusieurs concepts. Il se peut qu'il en résulte une application non optimisée.
 
--Pas assez de temps pour mettre en place des tests.
+- Je n'ai pas démarré le projet en TDD. De ce fait, je n'ai pas eu assez de temps pour mettre en place des tests. Cependant, je suis en train de refaire la partie back-end en TDD.
 
-- Réduire au minimum le javascript utilisé pour économiser les ressources du client, simplifier le code, améliorer la performance du crawler Google.
-
-## Réalisation
-
-1. Web scraping des données
-   - Récupération des données des terrains
-     - Nom
-     - Adresse
-     - Lat/long
-     - Dimensions
-     - Revetement
-     - Découvert ?
-     - éclairage ?
-2. Mise en place du back-end
-   - Enregistrement des données dans une BDD
+- Le but recherché en utilisant le templating Golang était de réduire au minimum le javascript utilisé pour économiser les ressources du client, simplifier le code, améliorer la performance du crawler Google.
 
 ## Sources de données
 

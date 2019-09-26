@@ -1,5 +1,35 @@
 {{ define "yield"}}
+<style>
+  /* CSS for court.html */
+
+  #court-details {
+    height: 100%;
+    width: 90%;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #details {
+    flex: 1;
+    text-align: center;
+  }
+
+  #map {
+    flex: 2;
+    height: 50vh;
+    color: black;
+  }
+
+  @media screen and (max-width: 930px) {
+    #court-details {
+      display: unset;
+    }
+  }
+</style>
 <div id="court-details">
+  <div id="map"></div>
   <ul id="details">
     <li>Nom : {{ .Name }}</li>
     <li>
@@ -10,7 +40,6 @@
     <li>Découvert: {{ .Decouvert}}</li>
     <li>Eclairage: {{ .Eclairage}}</li>
   </ul>
-  <div id="map"></div>
 </div>
 <form action="/court/{{.ID }}/comment/new" method="POST">
   <fieldset>

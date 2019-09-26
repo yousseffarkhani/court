@@ -1,143 +1,160 @@
 {{ define "main"}}
 <!DOCTYPE html>
 <html lang="fr">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <link rel="stylesheet" href="/static/css/style.css" />
-    <title>Terrains de Basket-Ball</title>
-    <link
-      rel="shortcut icon"
-      href="https://freepngimg.com/download/basketball/4-2-basketball-transparent.png"
-      type="image/x-icon"
-    />
-    <!-- TODO: Add favicon -->
-    <style>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <link rel="stylesheet" href="/static/css/style.css" />
+  <title>Terrains de Basket-Ball</title>
+  <link rel="shortcut icon" href="https://freepngimg.com/download/basketball/4-2-basketball-transparent.png"
+    type="image/x-icon" />
+  <!-- TODO: Add favicon -->
+  <style>
+    header {
+      width: 100%;
+      background-color: grey;
+      padding: 1rem 0;
+      display: flex;
+      margin-bottom: 1rem;
+      position: sticky;
+      top: 0px;
+      z-index: 1;
+    }
+
+    .left {
+      flex: 3;
+    }
+
+    .right {
+      flex: 4;
+      display: flex;
+      align-items: center;
+      justify-content: space-evenly;
+    }
+
+    #title {
+      display: flex;
+      align-items: center;
+      color: white;
+      font-size: 1rem;
+    }
+
+    #icon {
+      font-size: 3rem;
+      margin: 0 1rem;
+    }
+
+    #input {
+      padding: 1rem;
+      width: 300px;
+      text-align: center;
+      font-size: 1rem;
+      border-radius: 1rem;
+    }
+
+    #searchBtn {
+      padding: 1rem;
+      margin-left: 0.5rem;
+      font-size: 1rem;
+      border-radius: 1rem;
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+    }
+
+    .nav-button {
+      color: #bfc3c8;
+      font-weight: bold;
+      font-size: 1.5rem;
+      margin-right: 1rem;
+      text-align: center;
+    }
+
+    .nav-button:hover {
+      color: #ffffff;
+    }
+
+    @media screen and (max-width: 1650px) {
       header {
-        width: 100%;
-        background-color: grey;
-        padding: 1rem 0;
-        display: flex;
-        margin-bottom: 1rem;
-        position: sticky;
-        top: 0px;
-        z-index: 1;
-      }
-      .left {
-        flex: 3;
+        flex-direction: column;
       }
 
       .right {
-        flex: 4;
-        display: flex;
-        align-items: center;
-        justify-content: space-evenly;
+        justify-content: center;
       }
+    }
 
-      #title {
-        display: flex;
-        align-items: center;
-        color: white;
+    @media screen and (max-width: 930px) {
+
+      .nav-button,
+      h1 {
         font-size: 1rem;
       }
 
-      #icon {
-        font-size: 3rem;
-        margin: 0 1rem;
+      #search-form {
+        width: 95%;
       }
 
       #input {
-        padding: 1rem;
-        width: 300px;
-        text-align: center;
-        font-size: 1rem;
-        border-radius: 1rem;
+        padding: 0.2rem;
+        width: 70%;
+        font-size: 0.8rem;
+        border-radius: 0.3rem;
       }
 
       #searchBtn {
-        padding: 1rem;
-        margin-left: 0.5rem;
-        font-size: 1rem;
-        border-radius: 1rem;
+        padding: 0.2rem;
+        font-size: 0.8rem;
+        margin-left: 0;
+        border-radius: 0.3rem;
       }
 
-      nav {
-        display: flex;
-        align-items: center;
+      .right {
+        flex-direction: column;
       }
+    }
+  </style>
+</head>
 
-      .nav-button {
-        color: #bfc3c8;
-        font-weight: bold;
-        font-size: 1.5rem;
-        margin-right: 1rem;
-        text-align: center;
-      }
+<body>
+  <header>
+    <div class="left">
+      <a id="title" href="/"><span id="icon">🏀</span>
+        <h1>
+          Court ! <br />Trouves le terrain de basket-ball le plus proche
+        </h1>
+      </a>
+    </div>
 
-      .nav-button:hover {
-        color: #ffffff;
-      }
+    <div class="right">
+      <nav>
+        {{if .UserLogged}}
+        <a class="nav-button" href="/court/new">Créer<br />un terrain</a>
+        <a class="nav-button" href="">Profil</a>
+        <a class="nav-button" href="/logout">Déconnexion</a>
+        {{else}}
+        <a class="nav-button" href="/login">Connexion</a>
+        {{ end }}
+        <a class="nav-button" href="/contact">Contact</a>
+      </nav>
+      <form id="search-form">
+        <input id="input" type="text" placeholder="Saisissez un arrondissement ou un lieu" />
+        <button id="searchBtn" type="submit">
+          Rechercher
+        </button>
+        <!-- TODO: Ajouter d'autres critères -->
+      </form>
+    </div>
+  </header>
+  <script src="/static/js/main.js"></script>
+  <section>
+    {{ template "yield" .Data}}
+  </section>
+</body>
 
-      @media screen and (max-width: 1650px) {
-        header {
-          flex-direction: column;
-        }
-
-        .right {
-          justify-content: center;
-        }
-      }
-
-      @media screen and (max-width: 930px) {
-        .right {
-          flex-direction: column;
-        }
-        nav {
-          padding: 1rem 0;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <header>
-      <div class="left">
-        <a id="title" href="/"
-          ><span id="icon">🏀</span>
-          <h1>
-            Court ! <br />Trouves le terrain de basket-ball le plus proche
-          </h1></a
-        >
-      </div>
-
-      <div class="right">
-        <nav>
-          {{if .UserLogged}}
-          <a class="nav-button" href="/court/new">Créer<br />un terrain</a>
-          <a class="nav-button" href="">Profil</a>
-          <a class="nav-button" href="/logout">Déconnexion</a>
-          {{else}}
-          <a class="nav-button" href="/login">Connexion</a>
-          {{ end }}
-          <a class="nav-button" href="/contact">Contact</a>
-        </nav>
-        <form id="search-form">
-          <input
-            id="input"
-            type="text"
-            placeholder="Saisissez un arrondissement ou un lieu"
-          />
-          <button id="searchBtn" type="submit">
-            Rechercher
-          </button>
-          <!-- TODO: Ajouter d'autres critères -->
-        </form>
-      </div>
-    </header>
-    <script src="/static/js/main.js"></script>
-    <section>
-      {{ template "yield" .Data}}
-    </section>
-  </body>
 </html>
 {{ end }}

@@ -11,8 +11,8 @@ RUN go get ./
 RUN go install
 
 # Launches app if production mode otherwise launches a server with hot reload
-CMD if [ "${APP_ENV}" = "production" ]; then app; \
+CMD if [ "${APP_ENV}" = "production" ]; then court; \
 	else go get github.com/gravityblast/fresh && fresh; \
 	fi
 
-EXPOSE 8080
+EXPOSE 8080:8080

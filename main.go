@@ -25,11 +25,18 @@ func main() {
 
 	port := os.Getenv("PORT")
 
+	if os.Getenv("APP_ENV") == "production" {
+		if port == "" {
+			port = "443"
+		}
+		log.Fatal(http.ListenAndServeTLS(":"+port, "fullchain.pem", "privkey.pem", server))
+	}
 	if port == "" {
 		port = "8080"
 	}
-	fmt.Printf("Starting the server on port: %s\n", port)
 	log.Fatal(http.ListenAndServe(":"+port, server))
+
+	fmt.Printf("Starting the server on port: %s\n", port)
 }
 
 func DisplayError(err error) {
