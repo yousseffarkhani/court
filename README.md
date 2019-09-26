@@ -9,6 +9,7 @@ N'étant pas satisfait des capacités du templating Golang, je vais ajouter un f
 - Amélioration du code
 - Homogénéiser la langue utilisée (français)
 - ~~Ajouter une fonction permettant de lancer le serveur en https en mode production et sur le port 8080 de localhost en mode dev.~~
+- Rediriger le traffic HTTP vers HTTPS
 - Automatiser le renouvellement du certificat TLS.
 
 
@@ -24,13 +25,17 @@ Créer un fichier .env dans la racine du projet avec 2 variables (POSTGRES_USER=
 
 1. `docker-compose up --build`
 
-- Lancer le projet en mode production :
+- Lancer le projet en mode production sur AWS :
 
 1. Ajouter APP_ENV=production au fichier .env.
-2. `docker-compose up --build`
+2. Ajouter
+```
+CERTFILE=XXX/cert.pem
+PRIVKEY=XXX/privkey.pem
 
-- Déployer sur AWS
-1. Changer tous les ports sur 443 pour du HTTPS et 80 pour du HTTP.
+```
+3. Changer dans le Dockerfile et docker-compose les ports sur 443 pour du HTTPS.
+4. `docker-compose up --build`
 
 # Description de l'application
 

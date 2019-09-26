@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 
 	"github.com/yousseffarkhani/court/database"
 	"github.com/yousseffarkhani/court/server"
@@ -29,14 +30,18 @@ func main() {
 		if port == "" {
 			port = "443"
 		}
-		log.Fatal(http.ListenAndServeTLS(":"+port, "fullchain.pem", "privkey.pem", server))
+		pwd, _ := os.Getwd()
+		fmt.Printf("Starting the server on port: %s\n", port)
+		pathToCertFile := os.Getenv("CERTFILE")
+		pathToPrivKey := os.Getenv("PRIVKEY")
+		log.Fatal(http.ListenAndServeTLS(":"+port, filepath.Join(pwd, pathToCertFile), filepath.Join(pwd, pathToPrivKey), server))
 	}
 	if port == "" {
 		port = "8080"
 	}
+	fmt.Printf("Starting the server on port: %s\n", port)
 	log.Fatal(http.ListenAndServe(":"+port, server))
 
-	fmt.Printf("Starting the server on port: %s\n", port)
 }
 
 func DisplayError(err error) {
